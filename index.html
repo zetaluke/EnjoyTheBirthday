@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Post für euch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Seite */
+    --bg: #f6efe8;
+    --bg-2: #fbe9e4;
+    --ink: #4a4440;
+    --muted: #8a817a;
+    --error: #b0524a;
+    /* Karte & Umschlag (Papier bleibt in beiden Modi hell) */
+    --paper: #fffaf3;
+    --paper-ink: #4a4440;
+    --paper-muted: #9a9089;
+    --line: #eadfd3;
+    --blush: #f4d4cf;
+    --blush-deep: #e6a9a0;
+    --sage: #cfe2cf;
+    --sage-deep: #9fc4a3;
+    --butter: #f7e8b5;
+    --lav: #ddd6ef;
+    --lav-deep: #b7aad8;
+    --sky: #d7e9f3;
+    --env: #f2cfc8;
+    --env-front: #f7ddd7;
+    --env-flap: #ecc0b8;
+    --btn: #9fc4a3;
+    --btn-ink: #263228;
+    --shadow: 0 24px 50px -24px rgba(110, 70, 50, .45);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #26222b; --bg-2: #322a35; --ink: #f1e9e3; --muted: #b9adb5; --error: #ff9d92;
+      --shadow: 0 24px 50px -20px rgba(0, 0, 0, .75);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #26222b; --bg-2: #322a35; --ink: #f1e9e3; --muted: #b9adb5; --error: #ff9d92;
+    --shadow: 0 24px 50px -20px rgba(0, 0, 0, .75);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background: radial-gradient(ellipse at top, var(--bg-2), var(--bg) 65%);
+    background-color: var(--bg);
+    color: var(--ink);
+    font: 16px/1.55 Inter, system-ui, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 40px 16px 32px;
+    overflow-x: hidden;
+  }
+  main { width: 100%; max-width: 440px; transition: max-width .4s; }
+  main.wide { max-width: 720px; }
+  h1 {
+    font-family: Fraunces, Georgia, serif; font-weight: 500;
+    font-size: 2rem; line-height: 1.15; margin: 0 0 6px; text-align: center;
+  }
+  .lead { color: var(--muted); text-align: center; margin: 0 0 28px; }
+  .hidden { display: none !important; }
+
+  /* ---------- Umschlag ---------- */
+  .envelope { position: relative; width: 100%; aspect-ratio: 3 / 2; margin: 56px 0 28px; }
+  .env-back { position: absolute; inset: 0; background: var(--env); border-radius: 12px; box-shadow: var(--shadow); }
+  .peek {
+    position: absolute; left: 7%; right: 7%; top: 8%; height: 84%;
+    background: var(--paper); border-radius: 6px;
+    background-image: linear-gradient(90deg, var(--blush) 0 25%, var(--sage) 25% 50%, var(--butter) 50% 75%, var(--lav) 75%);
+    background-size: 100% 10px; background-repeat: no-repeat; background-position: top;
+    transition: transform .9s cubic-bezier(.3, .8, .3, 1) .35s;
+  }
+  .env-front, .flap { position: absolute; left: 0; width: 100%; }
+  .env-front { inset: 0; height: 100%; }
+  .flap { top: 0; height: 56%; transform-origin: top; transition: transform .55s ease-in, z-index 0s .28s; z-index: 3; }
+  .env-front { z-index: 2; }
+  .env-front svg, .flap svg { width: 100%; height: 100%; display: block; }
+  .seal {
+    position: absolute; left: 50%; top: 56%; z-index: 4;
+    width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%;
+    background: var(--blush-deep); color: var(--paper);
+    display: grid; place-items: center; font-size: 22px;
+    box-shadow: inset 0 0 0 4px rgba(255,255,255,.35), 0 4px 10px -4px rgba(0,0,0,.3);
+    transition: opacity .25s, transform .25s;
+  }
+  .envelope.open .seal { opacity: 0; transform: scale(.6); }
+  .envelope.open .flap { transform: rotateX(180deg); z-index: 0; }
+  .envelope.open .peek { transform: translateY(-58%); }
+  @media (prefers-reduced-motion: no-preference) {
+    .envelope.idle { animation: float 4s ease-in-out infinite; }
+  }
+  @keyframes float { 50% { transform: translateY(-6px) rotate(-.6deg); } }
+
+  form { display: grid; gap: 10px; }
+  label { font-size: .85rem; color: var(--muted); }
+  input {
+    width: 100%;
+    font: 600 1.1rem/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    letter-spacing: .12em; text-align: center; text-transform: uppercase;
+    padding: 14px 12px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--paper-ink);
+  }
+  input:focus { outline: 2px solid var(--sage-deep); outline-offset: 1px; }
+  button, .btn {
+    appearance: none; border: 0; cursor: pointer;
+    font: 600 1rem/1 Inter, system-ui, sans-serif;
+    padding: 15px 20px; border-radius: 999px;
+    background: var(--btn); color: var(--btn-ink);
+    text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  button:disabled { opacity: .6; cursor: progress; }
+  .btn.soft { background: var(--blush); color: var(--paper-ink); }
+  .btn.plain { background: transparent; color: var(--ink); border: 1px solid currentColor; opacity: .85; }
+  .error { color: var(--error); font-size: .92rem; min-height: 1.4em; margin: 0; text-align: center; }
+
+  /* ---------- Postkarte ---------- */
+  #card-view { animation: rise .8s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes rise { from { opacity: 0; transform: translateY(40px) scale(.96); } }
+  .card-wrap { perspective: 1800px; }
+  .postcard {
+    display: grid; grid-template-columns: minmax(0, 1fr); position: relative; cursor: pointer;
+    transform-style: preserve-3d; transition: transform .9s cubic-bezier(.4, .2, .2, 1);
+  }
+  .postcard.flipped { transform: rotateY(180deg); }
+  .face {
+    grid-area: 1 / 1; min-height: 0; min-width: 0;
+    background: var(--paper); color: var(--paper-ink);
+    border-radius: 14px; box-shadow: var(--shadow); overflow: hidden;
+    -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  }
+  .postcard::before { content: ""; grid-area: 1 / 1; aspect-ratio: 3 / 2; }
+  .front { display: flex; flex-direction: column; }
+  .front .art { flex: 1; min-height: 0; position: relative; }
+  .front .art svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .front .caption {
+    padding: 14px 20px 18px; text-align: center;
+    border-top: 6px solid transparent;
+    border-image: linear-gradient(90deg, var(--blush) 0 25%, var(--sage) 25% 50%, var(--butter) 50% 75%, var(--lav) 75%) 1;
+  }
+  .front .caption h1 { font-size: clamp(1.4rem, 4.6vw, 2.1rem); margin: 0; font-style: italic; }
+  .front .caption .to { font-family: Caveat, cursive; font-size: 1.35rem; color: var(--paper-muted); margin-top: 2px; }
+
+  .back {
+    transform: rotateY(180deg);
+    display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 0;
+    padding: 22px 22px 22px 26px;
+    background-image: linear-gradient(var(--paper), var(--paper)),
+      repeating-linear-gradient(45deg, var(--blush) 0 10px, var(--paper) 10px 16px, var(--sky) 16px 26px, var(--paper) 26px 32px);
+    background-clip: padding-box, border-box; background-origin: border-box;
+    border: 8px solid transparent;
+  }
+  .back .msg { padding-right: 20px; border-right: 1.5px solid var(--line); display: flex; flex-direction: column; justify-content: center; }
+  .back .msg p { font-family: Caveat, cursive; font-size: 1.55rem; line-height: 1.25; margin: 0; white-space: pre-wrap; }
+  .back .msg .sig { margin-top: 14px; text-align: right; font-weight: 700; }
+  .back .addr { padding-left: 20px; display: flex; flex-direction: column; }
+  .stamp-row { display: flex; justify-content: flex-end; position: relative; margin-bottom: auto; }
+  .stamp {
+    width: 86px; height: 104px; background: #fff;
+    border: 6px dotted var(--paper);
+    box-shadow: 0 0 0 1px var(--line);
+    padding: 2px; transform: rotate(3deg);
+  }
+  .stamp svg, .postmark svg { width: 100%; height: 100%; display: block; }
+  .postmark { position: absolute; right: 60px; top: 34px; width: 92px; height: 92px; opacity: .55; transform: rotate(-14deg); pointer-events: none; }
+  .lines { margin-top: 20px; }
+  .lines .l { border-bottom: 1.5px solid var(--line); height: 2.1rem; font-family: Caveat, cursive; font-size: 1.5rem; line-height: 2.4rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .lines .tag { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--paper-muted); }
+
+  @media (max-width: 560px) {
+    .back { grid-template-columns: minmax(0, 1fr); padding: 16px 16px 18px; }
+    .back .addr { order: -1; padding: 0 0 12px; flex-direction: row; align-items: flex-end; gap: 12px; border-bottom: 1.5px solid var(--line); margin-bottom: 14px; }
+    .back .addr .lines { flex: 1; min-width: 0; margin: 0; order: -1; }
+    .back .addr .lines .l:nth-child(n+3) { display: none; }
+    .stamp-row { margin: 0; }
+    .stamp { width: 64px; height: 78px; border-width: 5px; }
+    .postmark { right: 40px; top: 10px; width: 70px; height: 70px; }
+    .back .msg { padding: 0; border: 0; }
+    .back .msg p { font-size: 1.4rem; }
+  }
+
+  .hint { text-align: center; color: var(--muted); font-size: .88rem; margin: 14px 0 0; }
+  .gift { margin-top: 40px; text-align: center; }
+  .gift h2 { font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: 1.5rem; margin: 0 0 14px; }
+  .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .status { color: var(--muted); font-size: .88rem; margin: 12px 0 0; }
+  #pages { margin-top: 22px; display: grid; gap: 16px; }
+  #pages canvas { width: 100%; height: auto; display: block; border-radius: 6px; box-shadow: var(--shadow); background: #fff; }
+  footer { margin-top: 32px; color: var(--muted); font-size: .8rem; text-align: center; }
+  .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+</style>
+</head>
+<body>
+<main id="main">
+
+  <!-- ===== Geschlossener Umschlag ===== -->
+  <section id="locked">
+    <h1>Post für euch!</h1>
+    <p class="lead">In diesem Umschlag wartet ein kleiner Geburtstagsgruß.<br>Gebt euren Code ein, um ihn zu öffnen.</p>
+
+    <div class="envelope idle" id="envelope" aria-hidden="true">
+      <div class="env-back"></div>
+      <div class="peek"></div>
+      <div class="env-front">
+        <svg viewBox="0 0 300 200" preserveAspectRatio="none">
+          <path d="M0 6 Q0 0 6 0 L150 112 L294 0 Q300 0 300 6 L300 194 Q300 200 294 200 L6 200 Q0 200 0 194 Z" fill="var(--env-front)"/>
+          <path d="M0 200 L130 100 M300 200 L170 100" stroke="var(--env)" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+      <div class="flap">
+        <svg viewBox="0 0 300 112" preserveAspectRatio="none">
+          <path d="M0 0 L300 0 L156 108 Q150 113 144 108 Z" fill="var(--env-flap)"/>
+        </svg>
+      </div>
+      <div class="seal">♥</div>
+    </div>
+
+    <form id="form" autocomplete="off">
+      <label for="code">Geschenkcode</label>
+      <input id="code" name="code" placeholder="XXXX-XXXX-XXXX-XXXX" spellcheck="false" autocapitalize="characters" required>
+      <p class="error" id="error" role="alert"></p>
+      <button id="open" type="submit">Umschlag öffnen</button>
+    </form>
+  </section>
+
+  <!-- ===== Postkarte ===== -->
+  <section id="card-view" class="hidden">
+    <div class="card-wrap">
+      <div class="postcard" id="postcard" role="button" tabindex="0" aria-label="Karte umdrehen">
+
+        <!-- Vorderseite -->
+        <div class="face front">
+          <div class="art">
+            <svg viewBox="0 0 600 380" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <defs>
+                <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#d7e9f3"/><stop offset="1" stop-color="#fbeee6"/>
+                </linearGradient>
+                <linearGradient id="wine" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fbf0bf"/><stop offset="1" stop-color="#f1dc8f"/>
+                </linearGradient>
+              </defs>
+              <rect width="600" height="380" fill="url(#sky)"/>
+              <!-- Sonne & Wolken -->
+              <circle cx="470" cy="86" r="44" fill="#f7e8b5"/>
+              <circle cx="470" cy="86" r="62" fill="#f7e8b5" opacity=".35"/>
+              <g fill="#fff" opacity=".85">
+                <ellipse cx="120" cy="70" rx="46" ry="16"/><ellipse cx="150" cy="60" rx="30" ry="18"/>
+                <ellipse cx="330" cy="46" rx="34" ry="11"/><ellipse cx="352" cy="38" rx="20" ry="12"/>
+              </g>
+              <!-- Ballons -->
+              <g>
+                <path d="M62 150 q6 40 -4 80" stroke="#b9aea6" stroke-width="1.4" fill="none"/>
+                <ellipse cx="62" cy="128" rx="20" ry="24" fill="#f4d4cf"/><path d="M58 151 l4 -2 4 2 z" fill="#f4d4cf"/>
+                <path d="M96 140 q-4 40 6 90" stroke="#b9aea6" stroke-width="1.4" fill="none"/>
+                <ellipse cx="96" cy="116" rx="18" ry="22" fill="#ddd6ef"/><path d="M92 137 l4 -2 4 2 z" fill="#ddd6ef"/>
+                <ellipse cx="56" cy="120" rx="5" ry="8" fill="#fff" opacity=".6"/>
+                <ellipse cx="90" cy="108" rx="4" ry="7" fill="#fff" opacity=".6"/>
+              </g>
+              <!-- Hügel / Golfplatz -->
+              <path d="M0 230 Q120 170 260 205 T600 190 V380 H0 Z" fill="#dcebd8"/>
+              <path d="M0 268 Q150 225 320 250 T600 240 V380 H0 Z" fill="#c4ddc5"/>
+              <ellipse cx="400" cy="246" rx="70" ry="13" fill="#b2d3b5"/>
+              <ellipse cx="410" cy="247" rx="7" ry="2.6" fill="#7fa585"/>
+              <line x1="410" y1="247" x2="410" y2="168" stroke="#8a817a" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M411 169 L446 180 L411 192 Z" fill="#e6a9a0"/>
+              <!-- kleine Bäume -->
+              <g fill="#b2d3b5"><circle cx="520" cy="196" r="16"/><circle cx="540" cy="200" r="12"/><circle cx="215" cy="200" r="11"/></g>
+              <!-- Vordergrund -->
+              <path d="M0 312 Q200 286 400 304 T600 300 V380 H0 Z" fill="#e7f1e2"/>
+              <!-- Golfball -->
+              <circle cx="330" cy="318" r="13" fill="#fff" stroke="#e1d9d0" stroke-width="1.5"/>
+              <g fill="#e1d9d0"><circle cx="326" cy="313" r="1.6"/><circle cx="333" cy="314" r="1.6"/><circle cx="329" cy="320" r="1.6"/><circle cx="336" cy="321" r="1.6"/><circle cx="323" cy="321" r="1.6"/></g>
+              <!-- Weißweingläser -->
+              <g transform="translate(150 196) rotate(-12)">
+                <path d="M-26 0 H26 Q28 46 0 60 Q-28 46 -26 0 Z" fill="#fff" opacity=".7" stroke="#cfc4ba" stroke-width="1.6"/>
+                <path d="M-24.5 20 H24.5 Q22 48 0 58 Q-22 48 -24.5 20 Z" fill="url(#wine)"/>
+                <line x1="0" y1="60" x2="0" y2="112" stroke="#cfc4ba" stroke-width="3"/>
+                <ellipse cx="0" cy="114" rx="20" ry="5" fill="#fff" stroke="#cfc4ba" stroke-width="1.6"/>
+                <path d="M-16 6 Q-18 26 -10 40" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+              </g>
+              <g transform="translate(206 196) rotate(12)">
+                <path d="M-26 0 H26 Q28 46 0 60 Q-28 46 -26 0 Z" fill="#fff" opacity=".7" stroke="#cfc4ba" stroke-width="1.6"/>
+                <path d="M-24.5 20 H24.5 Q22 48 0 58 Q-22 48 -24.5 20 Z" fill="url(#wine)"/>
+                <line x1="0" y1="60" x2="0" y2="112" stroke="#cfc4ba" stroke-width="3"/>
+                <ellipse cx="0" cy="114" rx="20" ry="5" fill="#fff" stroke="#cfc4ba" stroke-width="1.6"/>
+                <path d="M-16 6 Q-18 26 -10 40" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+              </g>
+              <g stroke="#e6c76a" stroke-width="2.2" stroke-linecap="round">
+                <path d="M178 160 v-14 M171 153 h14"/><path d="M200 172 l6 -6 M206 172 l-6 -6"/><path d="M156 172 l-6 -6"/>
+              </g>
+              <!-- Spa: Steine, Eukalyptus, Kerze -->
+              <g>
+                <ellipse cx="505" cy="330" rx="46" ry="15" fill="#c9c0d9"/>
+                <ellipse cx="505" cy="306" rx="36" ry="13" fill="#ddd6ef"/>
+                <ellipse cx="507" cy="285" rx="26" ry="10" fill="#cfc6e2"/>
+                <ellipse cx="505" cy="268" rx="17" ry="8" fill="#e7e1f3"/>
+                <path d="M548 336 Q560 290 586 262" stroke="#9fc4a3" stroke-width="2.4" fill="none"/>
+                <g fill="#b6d4b8">
+                  <ellipse cx="556" cy="314" rx="10" ry="6" transform="rotate(-30 556 314)"/>
+                  <ellipse cx="572" cy="304" rx="10" ry="6" transform="rotate(20 572 304)"/>
+                  <ellipse cx="566" cy="288" rx="9" ry="5.5" transform="rotate(-40 566 288)"/>
+                  <ellipse cx="582" cy="278" rx="9" ry="5.5" transform="rotate(15 582 278)"/>
+                </g>
+                <rect x="434" y="316" width="22" height="22" rx="4" fill="#f4d4cf"/>
+                <path d="M445 316 q-5 -8 0 -14 q5 6 0 14z" fill="#f7e8b5"/>
+                <g stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".9">
+                  <path d="M492 252 q-6 -10 0 -20 q6 -10 0 -20"/><path d="M514 250 q-6 -10 0 -20 q6 -10 0 -20"/>
+                </g>
+              </g>
+              <!-- Konfetti -->
+              <g opacity=".9">
+                <rect x="260" y="110" width="8" height="4" rx="1" fill="#e6a9a0" transform="rotate(30 264 112)"/>
+                <rect x="300" y="140" width="8" height="4" rx="1" fill="#9fc4a3" transform="rotate(-20 304 142)"/>
+                <rect x="240" y="150" width="8" height="4" rx="1" fill="#b7aad8" transform="rotate(60 244 152)"/>
+                <circle cx="282" cy="96" r="3" fill="#f1dc8f"/><circle cx="560" cy="150" r="3" fill="#e6a9a0"/>
+                <circle cx="30" cy="40" r="3" fill="#9fc4a3"/><circle cx="380" cy="120" r="2.5" fill="#b7aad8"/>
+              </g>
+            </svg>
+          </div>
+          <div class="caption">
+            <h1 id="title">Alles Gute zum Geburtstag!</h1>
+            <div class="to" id="to-front"></div>
+          </div>
+        </div>
+
+        <!-- Rückseite -->
+        <div class="face back">
+          <div class="msg">
+            <p id="message">Auf euch beide – auf Sonne, Golf, ein Glas Weißen und ganz viel Entspannung!</p>
+            <p class="sig" id="from"></p>
+          </div>
+          <div class="addr">
+            <div class="stamp-row">
+              <div class="stamp" aria-hidden="true">
+                <svg viewBox="0 0 70 86">
+                  <rect width="70" height="86" fill="#ddd6ef"/>
+                  <circle cx="35" cy="34" r="20" fill="#f7e8b5"/>
+                  <path d="M0 62 Q20 50 40 58 T70 54 V86 H0 Z" fill="#cfe2cf"/>
+                  <line x1="46" y1="58" x2="46" y2="36" stroke="#8a817a" stroke-width="1.6"/>
+                  <path d="M46.5 36 L58 40 L46.5 44 Z" fill="#e6a9a0"/>
+                  <text x="35" y="80" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" font-weight="600" fill="#4a4440" letter-spacing=".5">ALLES GUTE</text>
+                </svg>
+              </div>
+              <div class="postmark" aria-hidden="true">
+                <svg viewBox="0 0 100 100">
+                  <defs><path id="ring" d="M50 50 m-34 0 a34 34 0 1 1 68 0 a34 34 0 1 1 -68 0"/></defs>
+                  <circle cx="50" cy="50" r="44" fill="none" stroke="#b7aad8" stroke-width="2"/>
+                  <circle cx="50" cy="50" r="26" fill="none" stroke="#b7aad8" stroke-width="1.5"/>
+                  <text font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#b7aad8" letter-spacing="2">
+                    <textPath href="#ring">MIT LIEBE · ZUM GEBURTSTAG ·</textPath>
+                  </text>
+                  <text x="50" y="55" text-anchor="middle" font-family="Fraunces, serif" font-size="14" fill="#b7aad8">♥</text>
+                </svg>
+              </div>
+            </div>
+            <div class="lines">
+              <div class="tag">An</div>
+              <div class="l" id="to-back">Euch beide</div>
+              <div class="l"></div>
+              <div class="l"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="hint" id="hint">Tippt auf die Karte, um sie umzudrehen ↻</p>
+
+    <div class="gift">
+      <h2>Euer Geschenk</h2>
+      <div class="actions">
+        <a class="btn" id="download" download>PDF herunterladen</a>
+        <a class="btn soft" id="newtab" target="_blank" rel="noopener">In neuem Tab öffnen</a>
+      </div>
+      <p class="status" id="status"></p>
+      <div id="pages"></div>
+    </div>
+  </section>
+</main>
+<footer>Der Inhalt ist verschlüsselt und öffnet sich nur mit dem richtigen Code.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  // Format von regalo.bin: "GIFT1" | salt(16) | iv(12) | AES-GCM(ciphertext)
+  // Klartext: uint32 BE Länge meta | meta JSON | PDF-Bytes
+  const GIFT_FILE = 'regalo.bin';
+  const MAGIC = 'GIFT1';
+  const ITERATIONS = 600000;
+
+  const $ = (id) => document.getElementById(id);
+  const normalize = (c) => c.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  async function deriveKey(code, salt) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(normalize(code)), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256' },
+      base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+  }
+
+  async function decryptGift(buf, code) {
+    const bytes = new Uint8Array(buf);
+    if (new TextDecoder().decode(bytes.slice(0, 5)) !== MAGIC) throw new Error('format');
+    const salt = bytes.slice(5, 21), iv = bytes.slice(21, 33), ct = bytes.slice(33);
+    const key = await deriveKey(code, salt);
+    const plain = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct));
+    const metaLen = new DataView(plain.buffer).getUint32(0);
+    const meta = JSON.parse(new TextDecoder().decode(plain.slice(4, 4 + metaLen)));
+    return { meta, pdf: plain.slice(4 + metaLen) };
+  }
+
+  const formatCode = (v) => normalize(v).slice(0, 16).replace(/(.{4})(?=.)/g, '$1-');
+
+  let cachedFile = null;
+  async function loadGiftFile() {
+    if (!cachedFile) {
+      const res = await fetch(GIFT_FILE, { cache: 'no-store' });
+      if (!res.ok) throw new Error('missing');
+      cachedFile = await res.arrayBuffer();
+    }
+    return cachedFile;
+  }
+
+  async function renderPdf(pdfBytes) {
+    const status = $('status');
+    if (!window.pdfjsLib) { status.textContent = 'Nutzt die Knöpfe oben, um es zu lesen.'; return; }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    status.textContent = 'Seiten werden vorbereitet…';
+    const doc = await pdfjsLib.getDocument({ data: pdfBytes.slice() }).promise;
+    const pages = $('pages');
+    const width = pages.clientWidth || 700;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    for (let n = 1; n <= doc.numPages; n++) {
+      const page = await doc.getPage(n);
+      const base = page.getViewport({ scale: 1 });
+      const vp = page.getViewport({ scale: (width / base.width) * dpr });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      canvas.setAttribute('aria-label', `Seite ${n} von ${doc.numPages}`);
+      pages.appendChild(canvas);
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+    }
+    status.textContent = doc.numPages === 1 ? '1 Seite' : `${doc.numPages} Seiten`;
+  }
+
+  function confetti() {
+    if (reduceMotion) return;
+    const c = document.createElement('canvas');
+    c.className = 'confetti'; document.body.appendChild(c);
+    const ctx = c.getContext('2d'), dpr = window.devicePixelRatio || 1;
+    const W = innerWidth, H = innerHeight;
+    c.width = W * dpr; c.height = H * dpr; ctx.scale(dpr, dpr);
+    const cols = ['#f4d4cf', '#e6a9a0', '#cfe2cf', '#9fc4a3', '#f7e8b5', '#ddd6ef', '#b7aad8', '#d7e9f3'];
+    const ps = Array.from({ length: 150 }, () => ({
+      x: Math.random() * W, y: -20 - Math.random() * H * 0.7,
+      vx: (Math.random() - .5) * 1.4, vy: 1.8 + Math.random() * 2.4,
+      r: Math.random() * 6.28, vr: (Math.random() - .5) * .2,
+      w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, c: cols[Math.random() * cols.length | 0],
+    }));
+    const t0 = performance.now();
+    (function frame(t) {
+      ctx.clearRect(0, 0, W, H);
+      for (const p of ps) {
+        p.x += p.vx + Math.sin((t + p.y) / 300) * .6; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r)) + 1);
+        ctx.restore();
+      }
+      if (t - t0 < 5000) requestAnimationFrame(frame); else c.remove();
+    })(t0);
+  }
+
+  function showGift({ meta, pdf }) {
+    const url = URL.createObjectURL(new Blob([pdf], { type: 'application/pdf' }));
+    $('download').href = url; $('download').download = meta.filename || 'geschenk.pdf';
+    $('newtab').href = url;
+    if (meta.title) $('title').textContent = meta.title;
+    if (meta.to) { $('to-front').textContent = 'für ' + meta.to; $('to-back').textContent = meta.to; }
+    if (meta.message) $('message').textContent = meta.message;
+    $('from').textContent = meta.from || '';
+    document.title = meta.title || 'Alles Gute zum Geburtstag!';
+
+    $('locked').classList.add('hidden');
+    $('card-view').classList.remove('hidden');
+    $('main').classList.add('wide');
+    confetti();
+    // Nach einem Moment die Rückseite mit der Widmung zeigen
+    if (!reduceMotion) setTimeout(() => { if (!touched) flip(); }, 2600);
+    renderPdf(pdf).catch(() => { $('status').textContent = 'Nutzt die Knöpfe oben, um es zu lesen.'; });
+  }
+
+  let touched = false;
+  function flip() { $('postcard').classList.toggle('flipped'); }
+  $('postcard').addEventListener('click', () => { touched = true; flip(); });
+  $('postcard').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); touched = true; flip(); }
+  });
+
+  async function unlock(code) {
+    const btn = $('open'), err = $('error'), env = $('envelope');
+    err.textContent = '';
+    if (normalize(code).length < 8) { err.textContent = 'Der Code scheint unvollständig zu sein.'; return; }
+    btn.disabled = true; btn.textContent = 'Wird geöffnet…';
+    try {
+      const buf = await loadGiftFile();
+      const gift = await decryptGift(buf, code);
+      env.classList.remove('idle'); env.classList.add('open');
+      await new Promise((r) => setTimeout(r, reduceMotion ? 0 : 1300)); // Umschlag-Animation abwarten
+      showGift(gift);
+    } catch (e) {
+      err.textContent = e.message === 'missing'
+        ? 'Das Geschenk ist noch nicht bereit. Bitte später noch einmal versuchen.'
+        : 'Der Code stimmt leider nicht. Bitte noch einmal prüfen.';
+      btn.disabled = false; btn.textContent = 'Umschlag öffnen';
+    }
+  }
+
+  $('code').addEventListener('input', (e) => { e.target.value = formatCode(e.target.value); });
+  $('form').addEventListener('submit', (e) => { e.preventDefault(); unlock($('code').value); });
+
+  // Code im URL-Fragment (aus dem QR-Code): #XXXX-XXXX-XXXX-XXXX – wird nie an den Server gesendet
+  const fromHash = decodeURIComponent(location.hash.slice(1));
+  if (fromHash) $('code').value = formatCode(fromHash);
+</script>
+</body>
+</html>
